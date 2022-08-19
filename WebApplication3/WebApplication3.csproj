@@ -213,6 +213,10 @@
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Shared\Error.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
+    <None Include="Web.Dev.config" />
+    <None Include="Web.Prod.config" />
+    <None Include="Web.QA.config" />
+    <None Include="Web.UAT.config" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
