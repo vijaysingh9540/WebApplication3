@@ -7,25 +7,6 @@ name: $(Year:yyyy).$(Month).$(DayOfMonth).$(Rev:r)-$(SemVerPrereleaseTag)
 steps:
 - script: echo $(Build.BuildNumber) #display Run Number
 
-- task: DotNetCoreCLI@2
-  displayName: Test
-  inputs:
-    command: test
-    projects: 'OM.UnitTest/OM.UnitTest.csproj'
-    arguments: '--configuration $(BuildConfiguration)'
-
-- task: DotNetCoreCLI@2
-  displayName: 'dotnet Merchants.OM.Api'
-  inputs:
-    command: publish
-    publishWebProjects: false
-    projects: 'OM.Api/OM.Api.csproj'
-    arguments: '--configuration Release --self-contained --runtime win-x64 --output $(build.artifactstagingdirectory) /p:version=$(build.buildversionnumber) /p:FileVersion=$(build.buildversionnumber)'
-    zipAfterPublish: true
-    modifyOutputPath: false
-    versioningScheme: byBuildNumber
-  enabled: false
-
 - task: VSBuild@1
   displayName: 'merchants.OM.Api'
   inputs:
