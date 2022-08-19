@@ -7,32 +7,6 @@ name: $(Year:yyyy).$(Month).$(DayOfMonth).$(Rev:r)-$(SemVerPrereleaseTag)
 steps:
 - script: echo $(Build.BuildNumber) #display Run Number
 
-- task: CopyFiles@2
-  inputs:
-    SourceFolder: '\\m1wutltfs01-p\Build'
-    Contents: '**'
-    TargetFolder: '$(Build.SourcesDirectory)/build'
-    OverWrite: true
-    preserveTimestamp: true
-  enabled: true
-
-- task: PowerShell@2
-  displayName: 'PowerShell Script'
-  inputs:
-    targetType: filePath
-    filePath: $(Build.SourcesDirectory)/build/Scripts/CreateBuildVersionNumberVariable.ps1
-  enabled: true
-
-- task: CopyFiles@2
-  displayName: 'Copy Files to: $(Build.ArtifactStagingDirectory)\Scripts'
-  inputs:
-    SourceFolder: '\\m1wutltfs01-p\Build/Scripts'
-    Contents: |
-     win*.ps1
-     Re*.ps1
-    TargetFolder: '$(Build.ArtifactStagingDirectory)/Scripts'
-  enabled: false
-
 - task: DotNetCoreCLI@2
   displayName: Test
   inputs:
