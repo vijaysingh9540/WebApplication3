@@ -7,33 +7,28 @@ trigger:
 - master
 
 pool:
-  name: NonTVBuilds
+  name: 'Default'
 
 variables:
-  SemVerPrereleaseTag: MVC Application'
+  solution: '**/*.sln'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
 
-name: $(Year:yyyy).$(Month).$(DayOfMonth).$(Rev:r)-$(SemVerPrereleaseTag)
 steps:
-- script: echo $(Build.BuildNumber) #display Run Number
+- task: NuGetToolInstaller@0
 
 - task: NuGetCommand@2
   inputs:
     restoreSolution: '$(solution)'
 
--  task: VSBuild@1
+- task: VSBuild@1
   inputs:
-    solution: WebApplication3.sln
-    vsVersion: 1.0
-    msbuildArgs: '/target:publish'
-    platform: '$(BuildPlatform)'
-    configuration: '$(BuildConfiguration)'
-    maximumCpuCount: true
-    msbuildArchitecture: x64
-  enabled: true
+    solution: '$(solution)'
+    msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:PackageLocation="$(build.artifactStagingDirectory)"'
+    platform: '$(buildPlatform)'
+    configuration: '$(buildConfiguration)'
 
-  - task: PublishBuildArtifacts@1
-  displayName: 'Publish Artifact'
+- task: VSTest@2
   inputs:
-    PathtoPublish: '$(build.artifactstagingdirectory)'
-    ArtifactName: '$(SemVerPrereleaseTag)'
-  condition: succeededOrFailed()
+    platform: '$(buildPlatform)'
+    configuration: '$(buildConfiguration)'
