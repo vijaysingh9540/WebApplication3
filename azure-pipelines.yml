@@ -64,17 +64,6 @@ steps:
     msbuildArchitecture: x64
   enabled: true
 
-- task: CopyFiles@2
-  displayName: 'Copy Files to: $(build.artifactstagingdirectory)\merchants.OM.Api'
-  inputs:
-    SourceFolder: '$(build.sourcesdirectory)\OM.Api\bin\Release\netcoreapp3.1\publish'
-    Contents: |
-     **\**  
-    TargetFolder: '$(build.artifactstagingdirectory)/merchants.OM.Api'
-    OverWrite: true
-    preserveTimestamp: true
-  enabled: true
-
 
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Artifact'
