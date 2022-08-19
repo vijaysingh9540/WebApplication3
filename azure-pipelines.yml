@@ -76,15 +76,6 @@ steps:
   enabled: true
 
 
-- task: ArchiveFiles@2
-  inputs:
-    rootFolderOrFile: '$(build.artifactstagingdirectory)/merchants.OM.Api'
-    includeRootFolder: true
-    archiveType: 'zip'
-    archiveFile: '$(Build.ArtifactStagingDirectory)/merchants.OM.Api.zip'
-    replaceExistingArchive: true
-  enabled: false
-
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Artifact'
   inputs:
