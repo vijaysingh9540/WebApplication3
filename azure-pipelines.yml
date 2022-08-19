@@ -1,34 +1,94 @@
-# ASP.NET
-# Build and test ASP.NET projects.
-# Add steps that publish symbols, save build artifacts, deploy, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/apps/aspnet/build-aspnet-4
-
-trigger:
-- master
-
 pool:
-  name: 'Default'
-
+  name: NonTVBuilds
 variables:
-  solution: '**/*.sln'
-  buildPlatform: 'Any CPU'
-  buildConfiguration: 'Release'
+  SemVerPrereleaseTag: 'merchants.OM.Api'
 
+name: $(Year:yyyy).$(Month).$(DayOfMonth).$(Rev:r)-$(SemVerPrereleaseTag)
 steps:
-- task: NuGetToolInstaller@0
+- script: echo $(Build.BuildNumber) #display Run Number
 
-- task: NuGetCommand@2
+- task: CopyFiles@2
   inputs:
-    restoreSolution: '$(solution)'
+    SourceFolder: '\\m1wutltfs01-p\Build'
+    Contents: '**'
+    TargetFolder: '$(Build.SourcesDirectory)/build'
+    OverWrite: true
+    preserveTimestamp: true
+  enabled: true
+
+- task: PowerShell@2
+  displayName: 'PowerShell Script'
+  inputs:
+    targetType: filePath
+    filePath: $(Build.SourcesDirectory)/build/Scripts/CreateBuildVersionNumberVariable.ps1
+  enabled: true
+
+- task: CopyFiles@2
+  displayName: 'Copy Files to: $(Build.ArtifactStagingDirectory)\Scripts'
+  inputs:
+    SourceFolder: '\\m1wutltfs01-p\Build/Scripts'
+    Contents: |
+     win*.ps1
+     Re*.ps1
+    TargetFolder: '$(Build.ArtifactStagingDirectory)/Scripts'
+  enabled: false
+
+- task: DotNetCoreCLI@2
+  displayName: Test
+  inputs:
+    command: test
+    projects: 'OM.UnitTest/OM.UnitTest.csproj'
+    arguments: '--configuration $(BuildConfiguration)'
+
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet Merchants.OM.Api'
+  inputs:
+    command: publish
+    publishWebProjects: false
+    projects: 'OM.Api/OM.Api.csproj'
+    arguments: '--configuration Release --self-contained --runtime win-x64 --output $(build.artifactstagingdirectory) /p:version=$(build.buildversionnumber) /p:FileVersion=$(build.buildversionnumber)'
+    zipAfterPublish: true
+    modifyOutputPath: false
+    versioningScheme: byBuildNumber
+  enabled: false
 
 - task: VSBuild@1
+  displayName: 'merchants.OM.Api'
   inputs:
-    solution: '$(solution)'
-    msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:PackageLocation="$(build.artifactStagingDirectory)"'
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
+    solution: OM.Api.sln
+    vsVersion: 16.0
+    msbuildArgs: '/target:publish'
+    platform: '$(BuildPlatform)'
+    configuration: '$(BuildConfiguration)'
+    maximumCpuCount: true
+    msbuildArchitecture: x64
+  enabled: true
 
-- task: VSTest@2
+- task: CopyFiles@2
+  displayName: 'Copy Files to: $(build.artifactstagingdirectory)\merchants.OM.Api'
   inputs:
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
+    SourceFolder: '$(build.sourcesdirectory)\OM.Api\bin\Release\netcoreapp3.1\publish'
+    Contents: |
+     **\**  
+    TargetFolder: '$(build.artifactstagingdirectory)/merchants.OM.Api'
+    OverWrite: true
+    preserveTimestamp: true
+  enabled: true
+
+
+- task: ArchiveFiles@2
+  inputs:
+    rootFolderOrFile: '$(build.artifactstagingdirectory)/merchants.OM.Api'
+    includeRootFolder: true
+    archiveType: 'zip'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/merchants.OM.Api.zip'
+    replaceExistingArchive: true
+  enabled: false
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact'
+  inputs:
+    PathtoPublish: '$(build.artifactstagingdirectory)'
+    ArtifactName: '$(SemVerPrereleaseTag)'
+  condition: succeededOrFailed()
+  
