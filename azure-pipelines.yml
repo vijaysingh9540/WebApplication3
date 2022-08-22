@@ -1,17 +1,16 @@
 pool:
   name: NonTVBuilds
 variables:
-  SemVerPrereleaseTag: 'merchants.OM.Api'
+  SemVerPrereleaseTag: 'WebApplication3'
 
 name: $(Year:yyyy).$(Month).$(DayOfMonth).$(Rev:r)-$(SemVerPrereleaseTag)
 steps:
 - script: echo $(Build.BuildNumber) #display Run Number
 
 - task: VSBuild@1
-  displayName: 'merchants.OM.Api'
+  displayName: 'WebApplication3'
   inputs:
-    solution: OM.Api.sln
-    vsVersion: 16.0
+    solution: WebApplication3.sln
     msbuildArgs: '/target:publish'
     platform: '$(BuildPlatform)'
     configuration: '$(BuildConfiguration)'
