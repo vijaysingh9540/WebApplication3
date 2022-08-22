@@ -18,6 +18,10 @@ steps:
     msbuildArchitecture: x64
   enabled: true
 
+- task: CopyFiles@2
+  inputs:
+    contents: 'Publish Artifact'
+    targetFolder: '$(build.artifactStagingDirectory)'
 
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Artifact'
